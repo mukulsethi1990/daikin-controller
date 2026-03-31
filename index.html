@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <title>Daikin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
     /* ── CSS Custom Properties ─────────────────────────────── */
     @property --border-angle {
@@ -42,7 +42,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100dvh;
@@ -152,17 +152,20 @@
     .modes::-webkit-scrollbar { display: none; }
     .mpill {
       flex: 0 0 auto;
-      padding: 8px 15px;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 13px;
       border-radius: 100px;
       border: 1.5px solid var(--border2);
       background: var(--s2);
       color: var(--muted2);
-      font-size: 12.5px; font-weight: 600;
+      font-size: 12px; font-weight: 600;
       cursor: pointer;
       transition: all 0.22s;
       position: relative; overflow: hidden;
       letter-spacing: 0.01em;
+      white-space: nowrap;
     }
+    .mpill svg { flex-shrink: 0; }
     /* shimmer on mode pill */
     .mpill::after {
       content: '';
@@ -355,7 +358,7 @@
       font-size: 14px; font-weight: 600;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: all 0.22s; font-family: 'Inter', sans-serif;
+      transition: all 0.22s; font-family: 'Plus Jakarta Sans', sans-serif;
       position: relative; overflow: hidden;
       container-type: inline-size;
     }
@@ -471,10 +474,35 @@
       background: var(--a); border: none;
       border-radius: var(--rsm);
       color: #000; font-size: 14px; font-weight: 700;
-      cursor: pointer; font-family: 'Inter', sans-serif;
+      cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
       transition: opacity 0.2s; margin-top: 4px;
     }
     .save-btn:active { opacity: 0.8; }
+
+    /* ── Loading state ─────────────────────────────────────── */
+    .pwr.loading, .fbn.loading, .mpill.loading { opacity: 0.55; pointer-events: none; }
+    @keyframes btn-spin { to { transform: rotate(360deg); } }
+    .btn-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: btn-spin 0.6s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── cursor:pointer on all interactive ─────────────────── */
+    .fbn, .mpill, .zone-card, .icon-btn, .tbn, .conn-pill { cursor: pointer; }
+
+    /* ── prefers-reduced-motion ────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .meteor { animation: none; opacity: 0; }
+      .dial-card { animation: none; background: var(--border2); }
+      .dial-temp { animation: none; }
+      .pwr::after { animation: none; }
+      .conn-dot { animation: none !important; }
+      * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -522,11 +550,26 @@
   </div>
 
   <div class="modes" id="modes">
-    <button class="mpill active" data-mode="cool" onclick="setMode('cool')">❄ Cool</button>
-    <button class="mpill" data-mode="heat" onclick="setMode('heat')">🔥 Heat</button>
-    <button class="mpill" data-mode="fan"  onclick="setMode('fan')">💨 Fan</button>
-    <button class="mpill" data-mode="dry"  onclick="setMode('dry')">💧 Dry</button>
-    <button class="mpill" data-mode="auto" onclick="setMode('auto')">⚡ Auto</button>
+    <button class="mpill active" data-mode="cool" onclick="setMode('cool')" aria-label="Cool mode">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M4.93 7l14.14 0M4.93 17l14.14 0M2 12h20M7.76 4.93L12 9.17l4.24-4.24M7.76 19.07L12 14.83l4.24 4.24"/></svg>
+      Cool
+    </button>
+    <button class="mpill" data-mode="heat" onclick="setMode('heat')" aria-label="Heat mode">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6L15 21H9l-.7-6C6.3 13.7 5 11.5 5 9a7 7 0 0 1 7-7z"/></svg>
+      Heat
+    </button>
+    <button class="mpill" data-mode="fan" onclick="setMode('fan')" aria-label="Fan mode">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 12c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5c0 2.5 2 4.5 4.5 4.5S21 5.5 21 8c-2.5 0-4.5 2-4.5 4.5S18.5 17 21 17c0-2.5-2-4.5-4.5-4.5S12 14.5 12 17c-2.5 0-4.5-2-4.5-4.5S5 8 2.5 8c0 2.5 2 4.5 4.5 4.5S12 14.5 12 17"/></svg>
+      Fan
+    </button>
+    <button class="mpill" data-mode="dry" onclick="setMode('dry')" aria-label="Dry mode">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+      Dry
+    </button>
+    <button class="mpill" data-mode="auto" onclick="setMode('auto')" aria-label="Auto mode">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Auto
+    </button>
   </div>
 
   <!-- Dial with border-beam card -->
@@ -580,11 +623,11 @@
       <svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/></svg>
       <span id="pwr-label">Turn Off</span>
     </button>
-    <button class="icon-btn" onclick="fetchAll()">
-      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 7l-2.26 2.26A9.75 9.75 0 0 0 12 7a9 9 0 0 0-9 9"/></svg>
+    <button class="icon-btn" onclick="fetchAll()" aria-label="Refresh status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 7l-2.26 2.26A9.75 9.75 0 0 0 12 7a9 9 0 0 0-9 9"/></svg>
     </button>
-    <button class="icon-btn" onclick="openModal()">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <button class="icon-btn" onclick="openModal()" aria-label="Open settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
   </div>
 
@@ -602,14 +645,26 @@
   }
 })();
 
-// ── Magic card spotlight on zone cards (delegated) ─────────────────────────
+// ── Magic card spotlight — mouse + touch ───────────────────────────────────
+function setSpotlight(card, x, y) {
+  const r = card.getBoundingClientRect();
+  card.style.setProperty('--mx', ((x-r.left)/r.width*100).toFixed(1)+'%');
+  card.style.setProperty('--my', ((y-r.top)/r.height*100).toFixed(1)+'%');
+  card.querySelector('.spotlight').style.opacity = '1';
+}
 document.addEventListener('mousemove', e => {
   const card = e.target.closest('.zone-card');
-  if (!card) return;
-  const r = card.getBoundingClientRect();
-  card.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
-  card.style.setProperty('--my', ((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+  if (card) setSpotlight(card, e.clientX, e.clientY);
 });
+document.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  const card = document.elementFromPoint(t.clientX, t.clientY)?.closest('.zone-card');
+  if (card) setSpotlight(card, t.clientX, t.clientY);
+}, { passive: true });
+document.addEventListener('mouseleave', e => {
+  const card = e.target.closest?.('.zone-card');
+  if (card) card.querySelector('.spotlight').style.opacity = '0';
+}, true);
 
 // ── Number ticker ──────────────────────────────────────────────────────────
 let _tickerFrom = 24, _tickerRAF;
@@ -708,10 +763,24 @@ async function sendZones() {
   });
 }
 
+// ── Loading helpers ────────────────────────────────────────────────────────
+function withLoading(el, promise, successMsg) {
+  if (!el) return promise.then(() => toast(successMsg));
+  const orig = el.innerHTML;
+  el.classList.add('loading');
+  el.innerHTML = `<span class="btn-spinner"></span>`;
+  return promise.finally(() => {
+    el.classList.remove('loading');
+    el.innerHTML = orig;
+    toast(successMsg);
+  });
+}
+
 // ── Actions ────────────────────────────────────────────────────────────────
 function setMode(m) {
   S.mode = m; renderMode(); renderTemp();
-  sendCtrl().then(() => toast(`Switched to ${m} mode`));
+  const btn = document.querySelector(`.mpill[data-mode="${m}"]`);
+  withLoading(btn, sendCtrl(), `Switched to ${m} mode`);
 }
 function adjustTemp(d) {
   if (S.mode==='fan') return;
@@ -722,11 +791,14 @@ function adjustTemp(d) {
 }
 function setFan(f) {
   S.fan = f; renderFan();
-  sendCtrl().then(() => toast('Fan speed updated'));
+  const btn = document.querySelector(`.fbn[data-fan="${f}"]`);
+  withLoading(btn, sendCtrl(), 'Fan speed updated');
 }
 function togglePower() {
   S.power = !S.power; renderPower();
-  sendCtrl().then(() => toast(S.power ? '✓ Turned on' : '✓ Turned off'));
+  const btn = document.getElementById('pwr');
+  const msg = S.power ? '✓ Turned on' : '✓ Turned off';
+  withLoading(btn, sendCtrl(), msg);
 }
 function toggleZone(i) {
   S.zones[i].on = !S.zones[i].on; renderZones();

@@ -6,39 +6,37 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Daikin">
-  <meta name="theme-color" content="#070b14">
+  <meta name="theme-color" content="#060a12">
   <link rel="manifest" href="manifest.json">
   <title>Daikin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ── CSS Custom Properties ─────────────────────────────── */
+    @property --border-angle {
+      syntax: '<angle>'; inherits: false; initial-value: 0deg;
+    }
     :root {
-      --bg:        #070b14;
-      --surface:   #0d1220;
-      --card:      #111827;
-      --card2:     #161f30;
-      --border:    rgba(255,255,255,0.06);
-      --border2:   rgba(255,255,255,0.10);
-      --text:      #f0f4ff;
-      --muted:     #4b5675;
-      --muted2:    #6b7a99;
-      --radius:    18px;
-      --radius-sm: 12px;
+      --bg:      #060a12;
+      --s1:      #0c1221;
+      --s2:      #101828;
+      --s3:      #141e30;
+      --border:  rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.10);
+      --text:    #eef2ff;
+      --muted:   #3d4f6e;
+      --muted2:  #5d7194;
+      --radius:  20px;
+      --rsm:     13px;
 
-      /* Mode colors */
-      --cool:      #00d4ff;
-      --cool-dim:  rgba(0,212,255,0.12);
-      --heat:      #ff7043;
-      --heat-dim:  rgba(255,112,67,0.12);
-      --dry:       #b39ddb;
-      --dry-dim:   rgba(179,157,219,0.12);
-      --fan:       #26d07c;
-      --fan-dim:   rgba(38,208,124,0.12);
-      --auto:      #90a4c8;
-      --auto-dim:  rgba(144,164,200,0.10);
+      --cool:  #00d4ff; --cool-d:  rgba(0,212,255,0.12);
+      --heat:  #ff7043; --heat-d:  rgba(255,112,67,0.12);
+      --dry:   #b39ddb; --dry-d:   rgba(179,157,219,0.12);
+      --fan:   #10b981; --fan-d:   rgba(16,185,129,0.12);
+      --auto:  #818cf8; --auto-d:  rgba(129,140,248,0.12);
 
-      --accent:     var(--cool);
-      --accent-dim: var(--cool-dim);
+      --a:   var(--cool);
+      --a-d: var(--cool-d);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -51,490 +49,453 @@
       overflow-x: hidden;
     }
 
-    /* Ambient glow */
-    .glow {
+    /* ── Meteor background ─────────────────────────────────── */
+    #meteors { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    @keyframes meteor-fall {
+      0%   { transform: rotate(215deg) translateX(0); opacity: 0; }
+      5%   { opacity: 1; }
+      80%  { opacity: 0.6; }
+      100% { transform: rotate(215deg) translateX(-800px); opacity: 0; }
+    }
+    .meteor {
+      position: absolute;
+      width: 1.5px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--a), transparent);
+      border-radius: 9999px;
+      filter: blur(0.5px);
+      animation: meteor-fall linear infinite;
+      animation-duration: var(--dur);
+      animation-delay: var(--delay);
+      top: var(--t);
+      left: var(--l);
+      opacity: 0;
+    }
+
+    /* ── Ambient glow ──────────────────────────────────────── */
+    #glow {
       position: fixed;
-      top: -120px;
-      left: 50%;
+      top: -150px; left: 50%;
       transform: translateX(-50%);
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, var(--accent-dim) 0%, transparent 65%);
-      pointer-events: none;
-      z-index: 0;
-      transition: background 0.7s ease;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--a-d) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+      transition: background 0.8s ease;
     }
 
+    /* ── Layout ────────────────────────────────────────────── */
     .app {
-      position: relative;
-      z-index: 1;
-      max-width: 420px;
-      margin: 0 auto;
+      position: relative; z-index: 1;
+      max-width: 430px; margin: 0 auto;
       min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: env(safe-area-inset-bottom);
+      display: flex; flex-direction: column;
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
     }
 
-    /* ── Header ── */
+    /* ── Header ────────────────────────────────────────────── */
     .header {
-      padding: 52px 20px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      padding: 56px 22px 0;
+      display: flex; justify-content: space-between; align-items: flex-start;
     }
-    .header-title {
+    .header-eyebrow {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted2);
-      margin-bottom: 3px;
+      font-size: 10.5px; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted2); margin-bottom: 4px;
     }
     .header-name {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.02em;
+      font-size: 21px; font-weight: 600;
+      letter-spacing: -0.025em; color: var(--text);
     }
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--card);
+    .conn-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--s2);
       border: 1px solid var(--border2);
       border-radius: 100px;
-      padding: 7px 13px 7px 10px;
-      font-size: 11.5px;
-      font-weight: 500;
-      color: var(--muted2);
-      transition: all 0.3s;
-      white-space: nowrap;
+      padding: 6px 13px 6px 9px;
+      font-size: 11.5px; font-weight: 500; color: var(--muted2);
+      transition: all 0.3s; white-space: nowrap;
     }
-    .status-pill.on { color: var(--fan); border-color: rgba(38,208,124,0.25); }
-    .status-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--muted);
-      flex-shrink: 0;
+    .conn-pill.live { color: var(--fan); border-color: rgba(16,185,129,0.3); }
+    .conn-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0;
     }
-    .status-pill.on .status-dot {
+    .conn-pill.live .conn-dot {
       background: var(--fan);
-      box-shadow: 0 0 6px var(--fan);
-      animation: blink 2.2s ease-in-out infinite;
+      box-shadow: 0 0 8px var(--fan);
+      animation: pulse-dot 2s ease-in-out infinite;
     }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-    /* ── Room temp strip ── */
-    .room-strip {
-      margin: 16px 20px 0;
-      background: var(--card);
+    /* ── Room temp ─────────────────────────────────────────── */
+    .room-bar {
+      margin: 16px 22px 0;
+      background: var(--s2);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: var(--rsm);
       padding: 11px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .room-strip-label { font-size: 12.5px; color: var(--muted2); }
-    .room-strip-val {
+    .room-bar span:first-child { font-size: 12.5px; color: var(--muted2); }
+    .room-val {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--accent);
-      transition: color 0.4s;
+      font-size: 14px; font-weight: 700;
+      color: var(--a); transition: color 0.5s;
     }
 
-    /* ── Mode pills ── */
+    /* ── Mode pills ────────────────────────────────────────── */
     .modes {
-      display: flex;
-      gap: 8px;
-      padding: 16px 20px 0;
-      overflow-x: auto;
-      scrollbar-width: none;
+      display: flex; gap: 7px;
+      padding: 18px 22px 0;
+      overflow-x: auto; scrollbar-width: none;
     }
     .modes::-webkit-scrollbar { display: none; }
-    .mode-pill {
+    .mpill {
       flex: 0 0 auto;
-      padding: 8px 16px;
+      padding: 8px 15px;
       border-radius: 100px;
       border: 1.5px solid var(--border2);
-      background: var(--card);
+      background: var(--s2);
       color: var(--muted2);
-      font-size: 12.5px;
-      font-weight: 600;
+      font-size: 12.5px; font-weight: 600;
       cursor: pointer;
       transition: all 0.22s;
+      position: relative; overflow: hidden;
       letter-spacing: 0.01em;
     }
-    .mode-pill:active { transform: scale(0.93); }
-    .mode-pill[data-mode="cool"].active  { background: var(--cool-dim); border-color: var(--cool);  color: var(--cool); }
-    .mode-pill[data-mode="heat"].active  { background: var(--heat-dim); border-color: var(--heat);  color: var(--heat); }
-    .mode-pill[data-mode="fan"].active   { background: var(--fan-dim);  border-color: var(--fan);   color: var(--fan); }
-    .mode-pill[data-mode="dry"].active   { background: var(--dry-dim);  border-color: var(--dry);   color: var(--dry); }
-    .mode-pill[data-mode="auto"].active  { background: var(--auto-dim); border-color: var(--auto);  color: var(--auto); }
+    /* shimmer on mode pill */
+    .mpill::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+    .mpill:hover::after { transform: translateX(100%); }
+    .mpill:active { transform: scale(0.92); }
+    .mpill[data-mode="cool"].active  { background: var(--cool-d); border-color: var(--cool); color: var(--cool); }
+    .mpill[data-mode="heat"].active  { background: var(--heat-d); border-color: var(--heat); color: var(--heat); }
+    .mpill[data-mode="fan"].active   { background: var(--fan-d);  border-color: var(--fan);  color: var(--fan); }
+    .mpill[data-mode="dry"].active   { background: var(--dry-d);  border-color: var(--dry);  color: var(--dry); }
+    .mpill[data-mode="auto"].active  { background: var(--auto-d); border-color: var(--auto); color: var(--auto); }
 
-    /* ── Dial ── */
-    .dial-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 20px 0;
+    /* ── Dial card ─────────────────────────────────────────── */
+    .dial-card {
+      margin: 18px 22px 0;
+      border-radius: 28px;
+      padding: 1.5px; /* border thickness */
+      background: conic-gradient(
+        from var(--border-angle),
+        var(--border) 0deg,
+        var(--border) 270deg,
+        var(--a) 300deg,
+        #fff 330deg,
+        var(--a) 360deg
+      );
+      animation: border-spin 5s linear infinite;
     }
-    .dial-ring {
-      position: relative;
-      width: 240px;
-      height: 240px;
+    @keyframes border-spin {
+      to { --border-angle: 360deg; }
     }
+    .dial-card-inner {
+      background: var(--s1);
+      border-radius: 27px;
+      padding: 28px 24px 24px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* dial ring */
+    .dial-ring { position: relative; width: 230px; height: 230px; }
     .dial-ring svg { width: 100%; height: 100%; }
     .dial-center {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .dial-sub {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted2);
-      margin-bottom: 2px;
+      font-size: 10.5px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--muted2); margin-bottom: 2px;
+    }
+    /* Aurora gradient on temp number */
+    @keyframes aurora-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
     .dial-temp {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 72px;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--accent);
-      transition: color 0.4s;
-      letter-spacing: -0.03em;
+      font-size: 70px; font-weight: 700; line-height: 1;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff 20%, var(--a) 50%, #fff 80%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: aurora-shift 4s ease-in-out infinite;
+      transition: filter 0.3s;
+      font-variant-numeric: tabular-nums;
     }
-    .dial-deg { font-size: 26px; vertical-align: super; font-weight: 500; }
-    .dial-mode-label {
-      font-size: 12px;
-      color: var(--muted2);
-      margin-top: 4px;
-      font-weight: 500;
+    .dial-deg { font-size: 24px; vertical-align: super; font-weight: 500; }
+    .dial-mode-tag {
+      font-size: 11px; color: var(--muted2); margin-top: 5px; font-weight: 500;
     }
 
     /* temp +/- */
-    .temp-btns {
-      display: flex;
-      gap: 20px;
-      margin-top: 18px;
-    }
-    .temp-btn {
-      width: 58px; height: 58px;
-      border-radius: 50%;
-      background: var(--card2);
+    .temp-btns { display: flex; gap: 18px; margin-top: 22px; }
+    .tbn {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--s3);
       border: 1.5px solid var(--border2);
-      color: var(--text);
-      font-size: 26px;
-      font-weight: 300;
+      color: var(--text); font-size: 26px; font-weight: 300;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.18s;
-      user-select: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s; user-select: none;
+      position: relative; overflow: hidden;
     }
-    .temp-btn:active { transform: scale(0.86); background: var(--accent-dim); border-color: var(--accent); }
+    .tbn::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--a-d) 0%, transparent 70%);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .tbn:active { transform: scale(0.84); }
+    .tbn:active::after { opacity: 1; }
 
-    /* ── Fan speed ── */
-    .section {
-      padding: 16px 20px 0;
+    /* ── Sections ──────────────────────────────────────────── */
+    .section { padding: 18px 22px 0; }
+    .sec-label {
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
     }
-    .section-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    .fan-row {
-      display: flex;
-      gap: 7px;
-    }
-    .fan-btn {
+
+    /* ── Fan speed ─────────────────────────────────────────── */
+    .fan-row { display: flex; gap: 7px; }
+    .fbn {
       flex: 1;
       padding: 10px 4px;
-      background: var(--card);
+      background: var(--s2);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: var(--rsm);
       color: var(--muted2);
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
+      font-size: 10.5px; font-weight: 700;
+      cursor: pointer; text-align: center;
       font-family: 'Space Grotesk', sans-serif;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       transition: all 0.18s;
     }
-    .fan-btn.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .fan-btn:active { transform: scale(0.92); }
+    .fbn.active { background: var(--a-d); border-color: var(--a); color: var(--a); }
+    .fbn:active { transform: scale(0.92); }
 
-    /* ── Zones ── */
-    .zones-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
+    /* ── Zone cards (magic card spotlight) ─────────────────── */
+    .zones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
     .zone-card {
-      background: var(--card);
+      background: var(--s2);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 16px;
       cursor: pointer;
-      transition: all 0.22s;
+      transition: border-color 0.25s, background 0.25s;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: space-between;
     }
+    .zone-card .spotlight {
+      position: absolute; inset: 0; pointer-events: none; border-radius: inherit; opacity: 0;
+      background: radial-gradient(250px circle at var(--mx,50%) var(--my,50%), rgba(0,212,255,0.09), transparent 70%);
+      transition: opacity 0.4s;
+    }
+    .zone-card:hover .spotlight { opacity: 1; }
     .zone-card.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
+      background: var(--a-d);
+      border-color: var(--a);
     }
-    .zone-card:active { transform: scale(0.96); }
     .zone-name {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--muted2);
-      line-height: 1.3;
-      max-width: 90px;
+      font-size: 12px; font-weight: 600; color: var(--muted2);
+      line-height: 1.3; max-width: 85px;
+      position: relative; z-index: 1;
     }
-    .zone-card.active .zone-name { color: var(--accent); }
-    .zone-toggle {
-      width: 36px; height: 20px;
-      border-radius: 100px;
-      background: var(--card2);
-      border: 1.5px solid var(--border2);
-      position: relative;
-      flex-shrink: 0;
-      transition: all 0.25s;
+    .zone-card.active .zone-name { color: var(--a); }
+
+    /* toggle pill */
+    .ztoggle {
+      width: 38px; height: 21px; border-radius: 100px;
+      background: var(--s3); border: 1.5px solid var(--border2);
+      position: relative; flex-shrink: 0; z-index: 1;
+      transition: background 0.28s, border-color 0.28s;
     }
-    .zone-toggle::after {
+    .ztoggle::after {
       content: '';
       position: absolute;
-      top: 2px; left: 2px;
+      top: 2.5px; left: 2.5px;
       width: 12px; height: 12px;
-      border-radius: 50%;
-      background: var(--muted);
-      transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      border-radius: 50%; background: var(--muted2);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.28s;
     }
-    .zone-card.active .zone-toggle {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-    .zone-card.active .zone-toggle::after {
-      transform: translateX(16px);
-      background: #fff;
-    }
+    .zone-card.active .ztoggle { background: var(--a); border-color: var(--a); }
+    .zone-card.active .ztoggle::after { transform: translateX(17px); background: #fff; }
 
-    /* ── Bottom actions ── */
-    .actions {
-      padding: 16px 20px 32px;
-      display: flex;
-      gap: 10px;
-    }
-    .power-btn {
-      flex: 1;
-      padding: 16px;
-      border-radius: var(--radius);
-      border: 1.5px solid rgba(239,68,68,0.3);
-      background: rgba(239,68,68,0.1);
-      color: #f87171;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.22s;
-      font-family: 'Inter', sans-serif;
-    }
-    .power-btn.off {
-      border-color: rgba(38,208,124,0.3);
-      background: rgba(38,208,124,0.1);
-      color: var(--fan);
-    }
-    .power-btn:active { transform: scale(0.96); }
-    .power-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
-    .action-btn {
-      width: 52px; height: 52px;
-      background: var(--card);
-      border: 1.5px solid var(--border2);
-      border-radius: var(--radius-sm);
-      color: var(--muted2);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.18s;
-    }
-    .action-btn:active { transform: scale(0.92); background: var(--card2); }
-    .action-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-
-    /* ── Last update ── */
-    .last-update {
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-      padding: 6px 0 2px;
+    /* ── Last update ───────────────────────────────────────── */
+    .stamp {
+      text-align: center; font-size: 10.5px; color: var(--muted);
+      padding: 8px 0 2px;
       font-family: 'Space Grotesk', sans-serif;
     }
 
-    /* ── Toast ── */
+    /* ── Bottom actions ────────────────────────────────────── */
+    .actions { padding: 16px 22px 0; display: flex; gap: 10px; }
+
+    /* Shimmer power button */
+    .pwr {
+      flex: 1; padding: 16px;
+      border-radius: var(--radius);
+      border: 1.5px solid rgba(239,68,68,0.3);
+      background: rgba(239,68,68,0.08);
+      color: #f87171;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.22s; font-family: 'Inter', sans-serif;
+      position: relative; overflow: hidden;
+      container-type: inline-size;
+    }
+    @keyframes shimmer-slide {
+      to { transform: translateX(calc(100cqw + 100%)); }
+    }
+    .pwr::after {
+      content: '';
+      position: absolute; top: 0; left: -60%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      animation: shimmer-slide 2.5s linear infinite;
+    }
+    .pwr.off {
+      border-color: rgba(16,185,129,0.35);
+      background: rgba(16,185,129,0.08);
+      color: var(--fan);
+    }
+    .pwr:active { transform: scale(0.96); }
+    .pwr svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; position: relative; z-index: 1; }
+    .pwr span { position: relative; z-index: 1; }
+
+    .icon-btn {
+      width: 52px; height: 52px;
+      background: var(--s2);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--rsm);
+      color: var(--muted2); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+    }
+    .icon-btn:active { transform: scale(0.91); background: var(--s3); }
+    .icon-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+    /* ── Toast ─────────────────────────────────────────────── */
     .toast {
-      position: fixed;
-      bottom: 90px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: var(--card2);
+      position: fixed; bottom: 88px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--s3);
       border: 1px solid var(--border2);
       border-radius: 100px;
       padding: 9px 20px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      opacity: 0;
-      transition: all 0.28s ease;
-      pointer-events: none;
-      white-space: nowrap;
-      z-index: 100;
+      font-size: 13px; font-weight: 500; color: var(--text);
+      opacity: 0; transition: all 0.26s ease;
+      pointer-events: none; white-space: nowrap; z-index: 100;
       backdrop-filter: blur(20px);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── Loading overlay ── */
+    /* ── Overlay ───────────────────────────────────────────── */
     .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(7,11,20,0.88);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      z-index: 200;
-      backdrop-filter: blur(16px);
+      position: fixed; inset: 0;
+      background: rgba(6,10,18,0.9);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      z-index: 200; backdrop-filter: blur(20px);
       transition: opacity 0.4s;
     }
     .overlay.hidden { opacity: 0; pointer-events: none; }
-    .spinner {
-      width: 36px; height: 36px;
+    .spin {
+      width: 34px; height: 34px;
       border: 2px solid var(--border2);
-      border-top-color: var(--accent);
+      border-top-color: var(--a);
       border-radius: 50%;
-      animation: spin 0.75s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .overlay p { font-size: 13px; color: var(--muted2); }
 
-    /* ── Settings modal ── */
-    .modal-bg {
-      position: fixed;
-      inset: 0;
-      background: rgba(7,11,20,0.7);
-      z-index: 300;
-      display: flex;
-      align-items: flex-end;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      backdrop-filter: blur(10px);
+    /* ── Settings modal ────────────────────────────────────── */
+    .mbg {
+      position: fixed; inset: 0;
+      background: rgba(6,10,18,0.75);
+      z-index: 300; display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s; backdrop-filter: blur(12px);
     }
-    .modal-bg.open { opacity: 1; pointer-events: all; }
+    .mbg.open { opacity: 1; pointer-events: all; }
     .modal {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      background: var(--surface);
+      width: 100%; max-width: 430px; margin: 0 auto;
+      background: var(--s1);
       border-radius: 28px 28px 0 0;
       border-top: 1px solid var(--border2);
-      padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
+      padding: 24px 22px calc(44px + env(safe-area-inset-bottom));
       transform: translateY(100%);
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      transition: transform 0.36s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .modal-bg.open .modal { transform: translateY(0); }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .mbg.open .modal { transform: translateY(0); }
+    .modal-head {
+      display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 20px;
     }
-    .modal-header h2 { font-size: 16px; font-weight: 600; }
-    .modal-close {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: var(--card2);
-      border: none;
-      color: var(--muted2);
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .modal-head h2 { font-size: 16px; font-weight: 600; }
+    .mclose {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--s3); border: none; color: var(--muted2);
+      font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
     .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 12px; color: var(--muted2); margin-bottom: 6px; font-weight: 500; }
+    .field label { display: block; font-size: 11.5px; color: var(--muted2); margin-bottom: 6px; font-weight: 500; }
     .field input {
-      width: 100%;
-      background: var(--card);
+      width: 100%; background: var(--s2);
       border: 1.5px solid var(--border2);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      color: var(--text);
-      font-family: 'Space Grotesk', monospace;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
+      border-radius: var(--rsm);
+      padding: 12px 14px; color: var(--text);
+      font-family: 'Space Grotesk', monospace; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
     }
-    .field input:focus { border-color: var(--accent); }
+    .field input:focus { border-color: var(--a); }
     .save-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: #000;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: opacity 0.2s;
-      margin-top: 4px;
+      width: 100%; padding: 14px;
+      background: var(--a); border: none;
+      border-radius: var(--rsm);
+      color: #000; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s; margin-top: 4px;
     }
     .save-btn:active { opacity: 0.8; }
   </style>
 </head>
 <body>
 
-<div class="glow" id="glow"></div>
+<div id="meteors"></div>
+<div id="glow"></div>
 
 <div class="overlay" id="overlay">
-  <div class="spinner"></div>
-  <p>Connecting…</p>
+  <div class="spin"></div>
+  <p>Connecting to unit…</p>
 </div>
 
-<div class="modal-bg" id="modal-bg">
+<div class="mbg" id="mbg">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-head">
       <h2>Settings</h2>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="mclose" onclick="closeModal()">✕</button>
     </div>
     <div class="field">
       <label>Unit IP / Host</label>
-      <input type="text" id="ip-input" placeholder="192.168.0.3" inputmode="url">
+      <input id="ip-input" type="text" placeholder="192.168.0.3" inputmode="url">
     </div>
     <button class="save-btn" onclick="saveSettings()">Save & Reconnect</button>
   </div>
@@ -544,94 +505,85 @@
 
 <div class="app">
 
-  <!-- Header -->
   <div class="header">
     <div>
-      <div class="header-title">Daikin Controller</div>
-      <div class="header-name" id="unit-name">Loading…</div>
+      <div class="header-eyebrow">Daikin</div>
+      <div class="header-name" id="unit-name">Controller</div>
     </div>
-    <div class="status-pill" id="status-pill">
-      <div class="status-dot"></div>
-      <span id="status-text">Connecting</span>
+    <div class="conn-pill" id="conn-pill">
+      <div class="conn-dot"></div>
+      <span id="conn-txt">Connecting</span>
     </div>
   </div>
 
-  <!-- Room temp -->
-  <div class="room-strip">
-    <span class="room-strip-label">Room temperature</span>
-    <span class="room-strip-val"><span id="room-temp">—</span> °C</span>
+  <div class="room-bar">
+    <span>Room temperature</span>
+    <span class="room-val"><span id="room-val">—</span> °C</span>
   </div>
 
-  <!-- Mode selector -->
   <div class="modes" id="modes">
-    <button class="mode-pill active" data-mode="cool" onclick="setMode('cool')">❄ Cool</button>
-    <button class="mode-pill" data-mode="heat" onclick="setMode('heat')">🔥 Heat</button>
-    <button class="mode-pill" data-mode="fan"  onclick="setMode('fan')">💨 Fan</button>
-    <button class="mode-pill" data-mode="dry"  onclick="setMode('dry')">💧 Dry</button>
-    <button class="mode-pill" data-mode="auto" onclick="setMode('auto')">⚡ Auto</button>
+    <button class="mpill active" data-mode="cool" onclick="setMode('cool')">❄ Cool</button>
+    <button class="mpill" data-mode="heat" onclick="setMode('heat')">🔥 Heat</button>
+    <button class="mpill" data-mode="fan"  onclick="setMode('fan')">💨 Fan</button>
+    <button class="mpill" data-mode="dry"  onclick="setMode('dry')">💧 Dry</button>
+    <button class="mpill" data-mode="auto" onclick="setMode('auto')">⚡ Auto</button>
   </div>
 
-  <!-- Dial -->
-  <div class="dial-wrap">
-    <div class="dial-ring">
-      <svg viewBox="0 0 240 240">
-        <!-- Track -->
-        <circle cx="120" cy="120" r="100" fill="none"
-          stroke="rgba(255,255,255,0.05)" stroke-width="20"
-          stroke-dasharray="534" stroke-dashoffset="134"
-          transform="rotate(126 120 120)"/>
-        <!-- Progress -->
-        <circle id="dial-arc" cx="120" cy="120" r="100" fill="none"
-          stroke="var(--accent)" stroke-width="20" stroke-linecap="round"
-          stroke-dasharray="534" stroke-dashoffset="467"
-          transform="rotate(126 120 120)"
-          style="transition: stroke-dashoffset 0.4s ease, stroke 0.4s ease;
-                 filter: drop-shadow(0 0 10px var(--accent));"/>
-      </svg>
-      <div class="dial-center">
-        <div class="dial-sub" id="dial-sub">Cooling to</div>
-        <div class="dial-temp" id="dial-temp">24<span class="dial-deg">°</span></div>
-        <div class="dial-mode-label" id="dial-mode-label">Cool mode</div>
+  <!-- Dial with border-beam card -->
+  <div class="dial-card">
+    <div class="dial-card-inner">
+      <div class="dial-ring">
+        <svg viewBox="0 0 230 230">
+          <circle cx="115" cy="115" r="98" fill="none"
+            stroke="rgba(255,255,255,0.05)" stroke-width="18"
+            stroke-dasharray="491" stroke-dashoffset="123"
+            transform="rotate(126 115 115)"/>
+          <circle id="dial-arc" cx="115" cy="115" r="98" fill="none"
+            stroke="var(--a)" stroke-width="18" stroke-linecap="round"
+            stroke-dasharray="491" stroke-dashoffset="430"
+            transform="rotate(126 115 115)"
+            style="transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+                   filter: drop-shadow(0 0 12px var(--a));"/>
+        </svg>
+        <div class="dial-center">
+          <div class="dial-sub" id="dial-sub">Cooling to</div>
+          <div class="dial-temp" id="dial-temp">24<span class="dial-deg">°</span></div>
+          <div class="dial-mode-tag" id="dial-tag">Cool mode</div>
+        </div>
+      </div>
+      <div class="temp-btns">
+        <button class="tbn" onclick="adjustTemp(-1)">−</button>
+        <button class="tbn" onclick="adjustTemp(1)">+</button>
       </div>
     </div>
-    <div class="temp-btns">
-      <button class="temp-btn" onclick="adjustTemp(-1)">−</button>
-      <button class="temp-btn" onclick="adjustTemp(1)">+</button>
-    </div>
   </div>
 
-  <!-- Last update -->
-  <div class="last-update" id="last-update">—</div>
+  <div class="stamp" id="stamp">—</div>
 
-  <!-- Fan speed -->
   <div class="section">
-    <div class="section-label">Fan Speed</div>
-    <div class="fan-row" id="fan-row">
-      <button class="fan-btn active" data-fan="A" onclick="setFan('A')">AUTO</button>
-      <button class="fan-btn" data-fan="1" onclick="setFan('1')">LOW</button>
-      <button class="fan-btn" data-fan="2" onclick="setFan('2')">MED</button>
-      <button class="fan-btn" data-fan="3" onclick="setFan('3')">HIGH</button>
+    <div class="sec-label">Fan Speed</div>
+    <div class="fan-row">
+      <button class="fbn active" data-fan="A" onclick="setFan('A')">AUTO</button>
+      <button class="fbn" data-fan="1" onclick="setFan('1')">LOW</button>
+      <button class="fbn" data-fan="2" onclick="setFan('2')">MED</button>
+      <button class="fbn" data-fan="3" onclick="setFan('3')">HIGH</button>
     </div>
   </div>
 
-  <!-- Zones -->
   <div class="section" id="zones-section">
-    <div class="section-label">Zones</div>
-    <div class="zones-grid" id="zones-grid">
-      <!-- populated by JS -->
-    </div>
+    <div class="sec-label">Zones</div>
+    <div class="zones-grid" id="zones-grid"></div>
   </div>
 
-  <!-- Actions -->
   <div class="actions">
-    <button class="power-btn" id="power-btn" onclick="togglePower()">
+    <button class="pwr" id="pwr" onclick="togglePower()">
       <svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/></svg>
-      <span id="power-label">Turn Off</span>
+      <span id="pwr-label">Turn Off</span>
     </button>
-    <button class="action-btn" onclick="fetchAll()" title="Refresh">
+    <button class="icon-btn" onclick="fetchAll()">
       <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 7l-2.26 2.26A9.75 9.75 0 0 0 12 7a9 9 0 0 0-9 9"/></svg>
     </button>
-    <button class="action-btn" onclick="openModal()" title="Settings">
+    <button class="icon-btn" onclick="openModal()">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
   </div>
@@ -639,41 +591,71 @@
 </div>
 
 <script>
+// ── Meteors ────────────────────────────────────────────────────────────────
+(function() {
+  const c = document.getElementById('meteors');
+  for (let i = 0; i < 14; i++) {
+    const m = document.createElement('span');
+    m.className = 'meteor';
+    m.style.cssText = `--t:${Math.random()*70}%;--l:${Math.random()*110}%;--dur:${4+Math.random()*7}s;--delay:${Math.random()*12}s`;
+    c.appendChild(m);
+  }
+})();
+
+// ── Magic card spotlight on zone cards (delegated) ─────────────────────────
+document.addEventListener('mousemove', e => {
+  const card = e.target.closest('.zone-card');
+  if (!card) return;
+  const r = card.getBoundingClientRect();
+  card.style.setProperty('--mx', ((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
+  card.style.setProperty('--my', ((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+});
+
+// ── Number ticker ──────────────────────────────────────────────────────────
+let _tickerFrom = 24, _tickerRAF;
+function tickTo(target) {
+  const el = document.getElementById('dial-temp');
+  const from = _tickerFrom;
+  const start = performance.now();
+  const dur = 350;
+  cancelAnimationFrame(_tickerRAF);
+  function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    const val = from + (target - from) * ease;
+    el.innerHTML = (Number.isFinite(val) ? Math.round(val) : val) + '<span class="dial-deg">°</span>';
+    if (p < 1) _tickerRAF = requestAnimationFrame(step);
+    else { _tickerFrom = target; }
+  }
+  _tickerRAF = requestAnimationFrame(step);
+}
+
 // ── State ──────────────────────────────────────────────────────────────────
 const S = {
-  ip:       localStorage.getItem('daikin_ip') || window.location.host,
-  power:    true,
-  mode:     'cool',
-  temp:     24,
-  fan:      'A',
-  roomTemp: null,
-  connected: false,
-  zones:    [],   // [{name, on}]
-  rawZoneNames: '',
+  ip: localStorage.getItem('daikin_ip') || window.location.host,
+  power: true, mode: 'cool', temp: 24, fan: 'A',
+  roomTemp: null, connected: false,
+  zones: [], rawZoneNames: '',
 };
 
 const MODES = {
-  auto: { code:'1', label:'Set to',     sub:'Auto mode',   accent:'--auto',  dim:'--auto-dim' },
-  dry:  { code:'2', label:'Drying',     sub:'Dry mode',    accent:'--dry',   dim:'--dry-dim'  },
-  cool: { code:'3', label:'Cooling to', sub:'Cool mode',   accent:'--cool',  dim:'--cool-dim' },
-  heat: { code:'4', label:'Heating to', sub:'Heat mode',   accent:'--heat',  dim:'--heat-dim' },
-  fan:  { code:'6', label:'Fan only',   sub:'Fan mode',    accent:'--fan',   dim:'--fan-dim'  },
+  auto: { code:'1', label:'Set to',     tag:'Auto mode',    a:'--auto', d:'--auto-d' },
+  dry:  { code:'2', label:'Drying at',  tag:'Dry mode',     a:'--dry',  d:'--dry-d'  },
+  cool: { code:'3', label:'Cooling to', tag:'Cool mode',    a:'--cool', d:'--cool-d' },
+  heat: { code:'4', label:'Heating to', tag:'Heat mode',    a:'--heat', d:'--heat-d' },
+  fan:  { code:'6', label:'Fan only',   tag:'Fan mode',     a:'--fan',  d:'--fan-d'  },
 };
-const CODE_TO_MODE = Object.fromEntries(Object.entries(MODES).map(([k,v])=>[v.code,k]));
+const C2M = Object.fromEntries(Object.entries(MODES).map(([k,v])=>[v.code,k]));
 
 // ── API ────────────────────────────────────────────────────────────────────
-function base() { return `http://${S.ip}`; }
-
+const base = () => `http://${S.ip}`;
 async function dGet(path) {
-  const r = await fetch(`${base()}${path}`, { cache:'no-store' });
-  const t = await r.text();
-  return Object.fromEntries(t.split(',').map(p => { const [k,...v]=p.split('='); return [k?.trim(), v.join('=').trim()]; }));
+  const t = await (await fetch(`${base()}${path}`, {cache:'no-store'})).text();
+  return Object.fromEntries(t.split(',').map(p=>{const[k,...v]=p.split('=');return[k?.trim(),v.join('=').trim()];}));
 }
-
 async function dSet(path, params) {
-  const qs = new URLSearchParams(params).toString();
-  const r = await fetch(`${base()}${path}?${qs}`, { cache:'no-store' });
-  return (await r.text()).includes('ret=OK');
+  const t = await (await fetch(`${base()}${path}?${new URLSearchParams(params)}`, {cache:'no-store'})).text();
+  return t.includes('ret=OK');
 }
 
 // ── Fetch ──────────────────────────────────────────────────────────────────
@@ -684,206 +666,158 @@ async function fetchAll() {
       dGet('/aircon/get_sensor_info'),
       dGet('/aircon/get_zone_setting'),
     ]);
-
-    if (ctrl.ret !== 'OK') throw new Error('bad response');
-
+    if (ctrl.ret !== 'OK') throw new Error();
     S.power    = ctrl.pow === '1';
-    S.mode     = CODE_TO_MODE[ctrl.mode] || 'cool';
-    S.temp     = parseFloat(ctrl.stemp) || S.temp;
+    S.mode     = C2M[ctrl.mode] || 'cool';
+    const newTemp = parseFloat(ctrl.stemp) || S.temp;
+    if (newTemp !== S.temp) { _tickerFrom = S.temp; tickTo(newTemp); }
+    S.temp     = newTemp;
     S.fan      = ctrl.f_rate || 'A';
     S.roomTemp = (sensor.htemp && sensor.htemp !== '-') ? parseFloat(sensor.htemp) : null;
-
-    // Parse zones
     if (zone.ret === 'OK') {
       S.rawZoneNames = zone.zone_name || '';
       const names  = decodeURIComponent(S.rawZoneNames).split(';').map(n=>n.trim());
-      const states = decodeURIComponent(zone.zone_onoff || '').split(';');
-      S.zones = names.map((name, i) => ({ name, on: states[i] === '1' }));
+      const states = decodeURIComponent(zone.zone_onoff||'').split(';');
+      S.zones = names.map((name,i) => ({name, on: states[i]==='1'}));
     }
-
     S.connected = true;
-    renderAll();
-    stamp();
-  } catch(e) {
+    renderAll(); stamp();
+  } catch {
     S.connected = false;
-    renderStatus();
+    renderConn();
     toast('⚠ Could not reach unit');
   } finally {
     document.getElementById('overlay').classList.add('hidden');
   }
 }
 
-// ── Send control ───────────────────────────────────────────────────────────
-async function sendControl() {
+// ── Send ───────────────────────────────────────────────────────────────────
+async function sendCtrl() {
   const m = MODES[S.mode];
   await dSet('/aircon/set_control_info', {
-    pow:    S.power ? '1' : '0',
-    mode:   m.code,
-    stemp:  S.mode === 'fan' ? '--' : S.temp,
-    shum:   0,
-    f_rate: S.fan,
-    f_dir:  0,
-    f_airside: 0,
-    airside1: 0,
-    airside2: 0,
+    pow: S.power?'1':'0', mode: m.code,
+    stemp: S.mode==='fan'?'--':S.temp,
+    shum:0, f_rate:S.fan, f_dir:0,
+    f_airside:0, airside1:0, airside2:0,
   });
 }
-
 async function sendZones() {
-  const onoff = S.zones.map(z => z.on ? '1' : '0').join(';');
   await dSet('/aircon/set_zone_setting', {
-    zone_name:  S.rawZoneNames,
-    zone_onoff: encodeURIComponent(onoff),
+    zone_name: S.rawZoneNames,
+    zone_onoff: encodeURIComponent(S.zones.map(z=>z.on?'1':'0').join(';')),
   });
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
 function setMode(m) {
-  S.mode = m;
-  renderMode(); renderTemp();
-  sendControl().then(() => toast('Mode updated'));
+  S.mode = m; renderMode(); renderTemp();
+  sendCtrl().then(() => toast(`Switched to ${m} mode`));
 }
-
 function adjustTemp(d) {
-  if (S.mode === 'fan') return;
+  if (S.mode==='fan') return;
+  const prev = S.temp;
   S.temp = Math.min(32, Math.max(16, (parseFloat(S.temp)||24) + d));
-  renderTemp();
-  sendControl().then(() => toast(`Set to ${S.temp}°C`));
+  _tickerFrom = prev; tickTo(S.temp); renderArc();
+  sendCtrl().then(() => toast(`Set to ${S.temp}°C`));
 }
-
 function setFan(f) {
-  S.fan = f;
-  renderFan();
-  sendControl().then(() => toast('Fan speed updated'));
+  S.fan = f; renderFan();
+  sendCtrl().then(() => toast('Fan speed updated'));
 }
-
 function togglePower() {
-  S.power = !S.power;
-  renderPower();
-  sendControl().then(() => toast(S.power ? '✓ Turned on' : '✓ Turned off'));
+  S.power = !S.power; renderPower();
+  sendCtrl().then(() => toast(S.power ? '✓ Turned on' : '✓ Turned off'));
 }
-
 function toggleZone(i) {
-  S.zones[i].on = !S.zones[i].on;
-  renderZones();
+  S.zones[i].on = !S.zones[i].on; renderZones();
   sendZones().then(() => toast(`${S.zones[i].name}: ${S.zones[i].on?'On':'Off'}`));
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
-function renderAll() {
-  renderStatus(); renderMode(); renderTemp(); renderFan(); renderPower(); renderRoomTemp(); renderZones();
-}
+function renderAll() { renderConn(); renderMode(); renderTemp(); renderFan(); renderPower(); renderRoom(); renderZones(); }
 
-function renderStatus() {
-  const pill = document.getElementById('status-pill');
-  const txt  = document.getElementById('status-text');
-  if (S.connected) {
-    pill.className = 'status-pill on';
-    txt.textContent = 'Connected';
-    document.getElementById('unit-name').textContent = 'Daikin Controller';
-  } else {
-    pill.className = 'status-pill';
-    txt.textContent = 'Offline';
-  }
+function renderConn() {
+  const p = document.getElementById('conn-pill');
+  document.getElementById('conn-txt').textContent = S.connected ? 'Connected' : 'Offline';
+  p.className = S.connected ? 'conn-pill live' : 'conn-pill';
 }
 
 function renderMode() {
   const cfg = MODES[S.mode];
-  // accent
-  document.documentElement.style.setProperty('--accent',     `var(${cfg.accent})`);
-  document.documentElement.style.setProperty('--accent-dim', `var(${cfg.dim})`);
-  // pills
-  document.querySelectorAll('.mode-pill').forEach(b =>
-    b.classList.toggle('active', b.dataset.mode === S.mode));
-  // dial labels
+  document.documentElement.style.setProperty('--a',   `var(${cfg.a})`);
+  document.documentElement.style.setProperty('--a-d', `var(${cfg.d})`);
+  document.querySelectorAll('.mpill').forEach(b => b.classList.toggle('active', b.dataset.mode===S.mode));
   document.getElementById('dial-sub').textContent = cfg.label;
-  document.getElementById('dial-mode-label').textContent = cfg.sub;
+  document.getElementById('dial-tag').textContent = cfg.tag;
 }
 
 function renderTemp() {
-  const t = S.mode === 'fan' ? '—' : S.temp;
-  document.getElementById('dial-temp').innerHTML = `${t}<span class="dial-deg">°</span>`;
-  // arc: 16→32 mapped over 270° arc, full arc circumference = 2π×100 ≈ 628, 75% = 471
-  const ARC = 400; // usable arc length
-  const pct = typeof S.temp === 'number' && S.mode !== 'fan'
-    ? (S.temp - 16) / (32 - 16) : 0.5;
-  const offset = 534 - ARC * pct;
-  document.getElementById('dial-arc').style.strokeDashoffset = offset;
+  const t = S.mode==='fan' ? '—' : S.temp;
+  if (S.mode !== 'fan') { _tickerFrom = t; tickTo(t); } else {
+    document.getElementById('dial-temp').innerHTML = `—<span class="dial-deg">°</span>`;
+  }
+  renderArc();
+}
+function renderArc() {
+  const ARC = 368;
+  const pct = typeof S.temp==='number' && S.mode!=='fan' ? (S.temp-16)/(32-16) : 0.5;
+  document.getElementById('dial-arc').style.strokeDashoffset = 491 - ARC*pct;
 }
 
 function renderFan() {
-  document.querySelectorAll('.fan-btn').forEach(b =>
-    b.classList.toggle('active', b.dataset.fan === S.fan));
+  document.querySelectorAll('.fbn').forEach(b => b.classList.toggle('active', b.dataset.fan===S.fan));
 }
 
 function renderPower() {
-  const btn   = document.getElementById('power-btn');
-  const label = document.getElementById('power-label');
-  if (S.power) {
-    btn.className = 'power-btn';
-    label.textContent = 'Turn Off';
-  } else {
-    btn.className = 'power-btn off';
-    label.textContent = 'Turn On';
-  }
+  const b = document.getElementById('pwr');
+  document.getElementById('pwr-label').textContent = S.power ? 'Turn Off' : 'Turn On';
+  b.className = S.power ? 'pwr' : 'pwr off';
 }
 
-function renderRoomTemp() {
-  document.getElementById('room-temp').textContent =
-    S.roomTemp !== null ? S.roomTemp : '—';
+function renderRoom() {
+  document.getElementById('room-val').textContent = S.roomTemp!==null ? S.roomTemp : '—';
 }
 
 function renderZones() {
-  const grid = document.getElementById('zones-grid');
-  // Only show zones with real names (not generic Zone3-Zone8)
   const visible = S.zones.filter(z => !/^Zone\d+$/.test(z.name));
-  if (!visible.length) {
-    document.getElementById('zones-section').style.display = 'none';
-    return;
-  }
-  document.getElementById('zones-section').style.display = '';
-  grid.innerHTML = visible.map((z, i) => {
-    const realIdx = S.zones.indexOf(z);
-    return `<div class="zone-card${z.on?' active':''}" onclick="toggleZone(${realIdx})">
+  const sec = document.getElementById('zones-section');
+  if (!visible.length) { sec.style.display='none'; return; }
+  sec.style.display='';
+  document.getElementById('zones-grid').innerHTML = visible.map(z => {
+    const i = S.zones.indexOf(z);
+    return `<div class="zone-card${z.on?' active':''}" onclick="toggleZone(${i})">
+      <div class="spotlight"></div>
       <div class="zone-name">${z.name}</div>
-      <div class="zone-toggle"></div>
+      <div class="ztoggle"></div>
     </div>`;
   }).join('');
 }
 
 function stamp() {
-  const el = document.getElementById('last-update');
-  el.textContent = `Updated ${new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})}`;
+  document.getElementById('stamp').textContent =
+    `Updated ${new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})}`;
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────
-let _toastT;
+let _tt;
 function toast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastT);
-  _toastT = setTimeout(() => el.classList.remove('show'), 2400);
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2400);
 }
 
 // ── Modal ──────────────────────────────────────────────────────────────────
-function openModal() {
-  document.getElementById('ip-input').value = S.ip;
-  document.getElementById('modal-bg').classList.add('open');
-}
-function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+function openModal() { document.getElementById('ip-input').value=S.ip; document.getElementById('mbg').classList.add('open'); }
+function closeModal() { document.getElementById('mbg').classList.remove('open'); }
 function saveSettings() {
   const v = document.getElementById('ip-input').value.trim();
   if (!v) return;
-  S.ip = v;
-  localStorage.setItem('daikin_ip', v);
+  S.ip = v; localStorage.setItem('daikin_ip', v);
   closeModal();
   document.getElementById('overlay').classList.remove('hidden');
   fetchAll();
 }
-document.getElementById('modal-bg').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-bg')) closeModal();
-});
+document.getElementById('mbg').addEventListener('click', e => { if(e.target===document.getElementById('mbg')) closeModal(); });
 
 // ── Init ───────────────────────────────────────────────────────────────────
 fetchAll();
